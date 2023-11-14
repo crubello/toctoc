@@ -1,0 +1,39 @@
+// https://www.mongodb.com/docs/manual/reference/geojson/
+// IMPORTANT
+// If specifying latitude and longitude coordinates, list the longitude first, and then latitude.
+// Valid longitude values are between -180 and 180, both inclusive.
+// Valid latitude values are between -90 and 90, both inclusive.
+
+
+//Indices 
+
+db.poligonos.createIndex( { "geometry" : "2dsphere" } )
+db.properties.createIndex( { "address.location" : "2dsphere" } )
+
+
+// Queries
+
+current_poligono = db.poligonos.findOne(
+    {geometry: {$geoIntersects: {$geometry: {type: "Point", coordinates: [ -71.1937, -32.9992 ]}}}});
+print('Current Poligono: ' + current_poligono.PROVINCIA);
+
+
+
+db.properties.find(
+    {
+        "address.location": {
+            $geoWithin: {
+                $geometry: {
+                    type: current_poligono.geometry.type,
+                    coordinates: current_poligono.geometry.coordinates
+                }
+            }
+        }
+
+
+    },
+    {
+        '_id': 0,
+        'title': 1, 
+    }
+  );
